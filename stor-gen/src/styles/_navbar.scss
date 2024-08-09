@@ -1,0 +1,39 @@
+@import "./_variable.scss";
+
+.v-app-bar {
+  background-color: $primary-color; // 使用你自定義的主題顏色
+
+  .v-icon {
+    color: black; // 圖標顏色設為白色
+  }
+
+  .v-btn--text {
+    color: white; // 按鈕文字顏色設為白色
+
+    .v-icon {
+      color: white; // 下拉圖標顏色設為白色
+    }
+  }
+
+  .v-text-field {
+    background-color: rgba(255, 255, 255, 0.2); // 輸入框背景顏色設為半透明白色
+    border-radius: 4px;
+
+    .v-input__icon--prepend .v-icon {
+      color: white; // 輸入框內的圖標顏色設為白色
+    }
+
+    .v-field__input {
+      color: black; // 輸入框內文字顏色設為白色
+    }
+  }
+
+  .custom-text-field {
+    width: 300px;
+    height: 40px;
+
+    .v-input__control {
+      height: 100%; // 確保內部控制元素佔滿整個高度
+    }
+  }
+}
