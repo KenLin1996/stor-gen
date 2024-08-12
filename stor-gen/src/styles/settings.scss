@@ -8,6 +8,13 @@
 // @use "vuetify/settings" with (
 //   $application-background: #e7dfc6
 // );
-
+.v-main {
+  .v-container {
+    margin-bottom: 50px;
+    border-radius: 8px;
+    margin-top: 50px;
+    background-color: #e7dfc6;
+  }
+}
 @import "_navbar";
 @import "_variable";

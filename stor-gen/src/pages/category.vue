@@ -53,9 +53,9 @@
     <v-row class="custom-mb-5" no-gutters>
       <v-chip-group column selected-class="text-primary" multiple>
         <v-chip
-          v-for="tag in tags"
-          :key="tag"
-          :text="tag"
+          v-for="chapterLabel in chapterLabels"
+          :key="chapterLabel"
+          :text="chapterLabel"
           class="custom-chip d-flex align-center justify-center"
           elevation="2"
         ></v-chip>
@@ -162,7 +162,7 @@ const wordCounts = [
   "2萬-5萬字",
   "5萬字以上",
 ];
-const tags = [
+const chapterLabels = [
   "爽文",
   "戰鬥",
   "日常",

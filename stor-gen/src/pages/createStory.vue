@@ -174,15 +174,28 @@
 
       <v-row>
         <v-col cols="12" class="d-flex align-center">
-          <v-icon class="me-2" v-if="requiredFields.includes('img')"
+          <v-icon class="me-2" v-if="requiredFields.includes('fileRecords')"
             >mdi-asterisk</v-icon
           >
           <v-label class="me-4 mb-0">封面圖片</v-label>
-          <v-file-input
+          <!-- <v-file-input
             class="flex-grow-1"
-            v-model="img.value.value"
-            :error-messages="img.errorMessage.value"
-          ></v-file-input>
+            v-model="image.value.value"
+            :error-messages="image.errorMessage.value"
+          ></v-file-input> -->
+          <vue-file-agent
+            v-model="fileRecords"
+            v-model:raw-model-value="rawFileRecords"
+            accept="image/jpeg,image/png"
+            deletable
+            max-size="1MB"
+            help-text="選擇檔案或拖曳到這裡"
+            :error-text="{
+              type: '檔案格式不支援',
+              size: '檔案大小不能超過 1MB',
+            }"
+            ref="fileAgent"
+          ></vue-file-agent>
         </v-col>
       </v-row>
 
@@ -219,6 +232,9 @@ definePage({
 const { apiAuth } = useApi();
 const createSnackbar = useSnackbar();
 
+const fileAgent = ref(null);
+const fileRecords = ref([]);
+const rawFileRecords = ref([]);
 const requiredFields = [
   "totalWordCount",
   "title",
@@ -228,7 +244,7 @@ const requiredFields = [
   "chapterLabels",
   "state",
   "show",
-  "img",
+  "fileRecords",
 ];
 
 const schema = yup.object({
@@ -240,10 +256,9 @@ const schema = yup.object({
   chapterLabels: yup.array().required("作品標籤必填"),
   state: yup.boolean().required("狀態必填"),
   show: yup.boolean().required("顯示方式必填"),
-  img: yup.string(),
 });
 
-const { handleSubmit, isSubmitting } = useForm({
+const { handleSubmit, isSubmitting, resetForm } = useForm({
   validationSchema: schema,
   initialValues: {
     totalWordCount: "",
@@ -254,7 +269,6 @@ const { handleSubmit, isSubmitting } = useForm({
     chapterLabels: [],
     state: true,
     show: true,
-    img: null,
   },
 });
 
@@ -266,7 +280,6 @@ const category = useField("category");
 const chapterLabels = useField("chapterLabels");
 const state = useField("state");
 const show = useField("show");
-const img = useField("img");
 
 const categoryOptions = ref([
   "文藝評論",
@@ -338,7 +351,14 @@ const labelOptions = ref([
   "恐怖",
 ]);
 
+const clearForm = () => {
+  resetForm();
+  fileAgent.value.deleteFileRecord();
+};
+
 const submit = handleSubmit(async (values) => {
+  if (fileRecords.value[0]?.error) return;
+
   try {
     const fd = new FormData();
     fd.append("totalWordCount", values.totalWordCount);
@@ -351,8 +371,8 @@ const submit = handleSubmit(async (values) => {
     }
     fd.append("state", values.state);
     fd.append("show", values.show);
-    if (values.img) {
-      fd.append("img", values.img);
+    if (fileRecords.value.length > 0) {
+      fd.append("image", fileRecords.value[0].file);
     }
 
     await apiAuth.post("/story", fd);
@@ -362,6 +382,7 @@ const submit = handleSubmit(async (values) => {
         color: "green",
       },
     });
+    clearForm();
   } catch (error) {
     console.log(error);
     createSnackbar({

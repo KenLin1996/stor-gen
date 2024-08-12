@@ -2,14 +2,7 @@
   <v-app>
     <NavBar />
     <v-main>
-      <router-view
-        style="
-          margin-bottom: 50px;
-          border-radius: 8px;
-          margin-top: 50px;
-          background-color: #e7dfc6;
-        "
-      />
+      <router-view />
     </v-main>
     <Footer />
   </v-app>

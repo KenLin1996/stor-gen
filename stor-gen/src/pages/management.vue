@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <v-breadcrumbs :items="items">
+  <v-container style="padding: 32px">
+    <v-breadcrumbs :items="items" style="padding: 0px 12px 16px 12px">
       <template v-slot:divider>
         <v-icon icon="mdi-chevron-right"></v-icon>
       </template>
@@ -36,15 +36,8 @@
                 text="已投票的故事"
                 value="option-4"
               ></v-tab>
-            </v-tabs>
-          </v-list-item>
-
-          <v-divider class="my-6"></v-divider>
-
-          <h3 class="mb-1">角色管理</h3>
-
-          <v-list-item>
-            <v-tabs v-model="tab" color="primary" direction="vertical">
+              <v-divider class="my-6"></v-divider>
+              <h3 class="mb-1">角色管理</h3>
               <v-tab
                 class="my-1"
                 prepend-icon="mdi-account-plus"
@@ -68,19 +61,37 @@
           <v-tabs-window-item value="option-1">
             <div class="d-flex align-center justify-space-between mb-4">
               <h3>我的故事</h3>
-              <v-btn prepend-icon="mdi-plus" size="small">新增故事</v-btn>
+              <v-btn prepend-icon="mdi-plus" size="small" to="/createStory"
+                >新增故事</v-btn
+              >
             </div>
             <v-divider></v-divider>
             <v-card flat>
               <v-card-text>
                 <v-data-table
+                  v-model:items-per-page="tableItemsPerPage"
+                  v-model:sort-by="tableSortBy"
+                  v-model:page="tablePage"
                   :headers="myStoryHeaders"
                   :items="myStoryItems"
+                  :items-length="tableItemsLength"
+                  @update:items-per-page="tableLoadMyStoryItems(false)"
+                  @update:sort-by="tableLoadMyStoryItems(false)"
+                  @update:page="tableLoadMyStoryItems(false)"
                   density="comfortable"
                   item-key="name"
                 >
-                  <template #[`item.img`]="{ item }">
-                    <v-img :src="item.img"></v-img>
+                  <template #[`item.image`]="{ value }">
+                    <!-- <v-img :src="item.image"></v-img> -->
+                    <v-img :src="value" max-height="100px" class="py-1"></v-img>
+                  </template>
+                  <template #[`item.state`]="{ item }">
+                    <span>{{ item.state ? "完結" : "連載" }}</span>
+                  </template>
+
+                  <!-- 顯示 -->
+                  <template #[`item.show`]="{ item }">
+                    <span>{{ item.show ? "公開" : "隱藏" }}</span>
                   </template>
                   <template #[`item.actions`]="{ item }">
                     <v-btn
@@ -89,6 +100,7 @@
                       :active="false"
                       :ripple="false"
                       variant="tonal"
+                      @click="openDialog(item)"
                     >
                       編輯
                     </v-btn>
@@ -353,11 +365,83 @@
       </div>
     </div>
   </v-container>
+  <v-dialog v-model="dialog.open" persistent width="500">
+    <v-form @submit.prevent="submit" :disabled="isSubmitting">
+      <v-card>
+        <v-card-title>編輯</v-card-title>
+        <v-card-text>
+          <v-text-field
+            label="書名"
+            v-model="title.value.value"
+            :error-messages="title.errorMessage.value"
+          ></v-text-field>
+
+          <v-label class="me-4 mb-0">故事狀態</v-label>
+          <v-radio-group
+            class="d-flex align-center"
+            row
+            hide-details
+            v-model="state.value.value"
+            :error-messages="state.errorMessage.value"
+          >
+            <div class="d-flex align-center">
+              <v-radio label="完結" :value="true" class="me-4"></v-radio>
+              <v-radio
+                label="連載中"
+                :value="false"
+                style="flex: none"
+              ></v-radio>
+            </div>
+          </v-radio-group>
+
+          <v-label class="me-4 mb-0">顯示方式</v-label>
+          <v-radio-group
+            class="d-flex align-center"
+            row
+            hide-details
+            v-model="show.value.value"
+            :error-messages="show.errorMessage.value"
+          >
+            <div class="d-flex align-center">
+              <v-radio label="公開" :value="true" class="me-4"></v-radio>
+              <v-radio label="隱藏" :value="false"></v-radio>
+            </div>
+          </v-radio-group>
+
+          <vue-file-agent
+            v-model="fileRecords"
+            v-model:raw-model-value="rawFileRecords"
+            accept="image/jpeg,image/png"
+            deletable
+            max-size="1MB"
+            help-text="選擇檔案或拖曳到這裡"
+            :error-text="{
+              type: '檔案格式不支援',
+              size: '檔案大小不能超過 1MB',
+            }"
+            ref="fileAgent"
+          ></vue-file-agent>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="red" :loading="isSubmitting" @click="closeDialog"
+            >取消</v-btn
+          >
+          <v-btn color="green" type="submit" :loading="isSubmitting"
+            >送出</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-form>
+  </v-dialog>
 </template>
 
 <script setup>
 import { definePage } from "vue-router/auto";
 import { ref } from "vue";
+import * as yup from "yup";
+import { useForm, useField } from "vee-validate";
+import { useApi } from "@/composables/axios";
+import { useSnackbar } from "vuetify-use-dialog";
 
 definePage({
   meta: {
@@ -372,15 +456,100 @@ const items = ref([
   { title: "故事/角色管理", disabled: true, href: "/management" },
 ]);
 
+const { apiAuth } = useApi();
+const createSnackbar = useSnackbar();
 const tab = ref("option-1");
+
+const tableItemsPerPage = ref(10);
+const tableSortBy = ref([{ key: "createdAt", order: "desc" }]);
+const tablePage = ref(1);
+const tableItemsLength = ref(0);
+
+const fileRecords = ref([]);
+const rawFileRecords = ref([]);
+
+const fileAgent = ref(null);
+
+const dialog = ref({
+  // 編輯對話框的狀態
+  open: false,
+  // 紀錄編輯中的 id，沒有就是新增，有就是編輯
+  id: "",
+});
+
+const openDialog = (item) => {
+  dialog.value.id = item._id;
+  title.value.value = item.title;
+  state.value.value = item.state;
+  show.value.value = item.show;
+
+  dialog.value.open = true;
+};
+
+const closeDialog = () => {
+  dialog.value.open = false;
+  resetForm();
+};
+
+const schema = yup.object({
+  title: yup.string().required("故事名稱必填"),
+  state: yup.boolean(),
+  show: yup.boolean(),
+});
+
+const { handleSubmit, isSubmitting, resetForm } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    title: "",
+    state: true,
+    show: true,
+  },
+});
+
+const title = useField("title");
+const state = useField("state");
+const show = useField("show");
+
+const submit = handleSubmit(async (values) => {
+  if (fileRecords.value[0]?.error) return;
+  if (dialog.value.id.length === 0 && fileRecords.value.length < 1) return;
+  try {
+    const fd = new FormData();
+    fd.append("title", values.title);
+    fd.append("state", values.state);
+    fd.append("show", values.show);
+    if (fileRecords.value.length > 0) {
+      fd.append("image", fileRecords.value[0].file);
+    }
+
+    await apiAuth.patch("/story/" + dialog.value.id, fd);
+
+    createSnackbar({
+      text: "新增成功",
+      snackbarProps: {
+        color: "green",
+      },
+    });
+    closeDialog();
+    tableLoadMyStoryItems(true);
+  } catch (error) {
+    console.log(error);
+    createSnackbar({
+      text: error?.response?.data?.message || "發生錯誤",
+      snackbarProps: {
+        color: "red",
+      },
+    });
+  }
+});
 
 const myStoryHeaders = [
   {
     title: "書封",
-    align: "start",
+    align: "center",
     width: "160px",
     sortable: false,
-    key: "img",
+    key: "image",
   },
   { title: "書名", align: "start", width: "130px", key: "title" },
   { title: "狀態", align: "center", key: "state" },
@@ -391,18 +560,49 @@ const myStoryHeaders = [
   { title: "編輯", align: "center", key: "actions", sortable: false },
 ];
 
-const myStoryItems = [
-  {
-    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzKYSIrA6-OO6TAY2mG-OT--cpO_HsVOGpbw&s",
-    title:
-      "想要讓人因此試著鍛煉成一個跟學生成員長很像的女生，結果我卻變成了她的僕人",
-    state: "連載中(100%)",
-    show: "公開",
-    collectionNum: 1000,
-    followNum: 1000,
-    totalVotes: 2300203,
-  },
-];
+const myStoryItems = ref([]);
+// const myStoryItems = [
+//   {
+//     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzKYSIrA6-OO6TAY2mG-OT--cpO_HsVOGpbw&s",
+//     title:
+//       "想要讓人因此試著鍛煉成一個跟學生成員長很像的女生，結果我卻變成了她的僕人",
+//     state: "連載中(100%)",
+//     show: "公開",
+//     collectionNum: 1000,
+//     followNum: 1000,
+//     totalVotes: 2300203,
+//   },
+// ];
+
+const tableLoadMyStoryItems = async () => {
+  try {
+    const { data } = await apiAuth.get("/story/all", {
+      params: {
+        page: tablePage.value,
+        itemsPerPage: tableItemsPerPage.value,
+        sortBy: tableSortBy.value[0]?.key || "createdAt",
+        sortOrder: tableSortBy.value[0]?.order || "desc",
+      },
+    });
+    console.log(data);
+    myStoryItems.value.splice(
+      0,
+      myStoryItems.value.length,
+      ...data.result.data
+    );
+    console.log(myStoryItems.value);
+    tableItemsLength.value = data.result.total;
+  } catch (error) {
+    console.log(error);
+    createSnackbar({
+      text: error?.response?.data?.message || "發生錯誤",
+      snackbarProps: {
+        color: "red",
+      },
+    });
+  }
+};
+tableLoadMyStoryItems();
 
 const continuationHeaders = [
   { title: "書名", align: "start", width: "130px", key: "title" },

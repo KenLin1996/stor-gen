@@ -120,25 +120,32 @@ const StorySchema = new Schema({
     type: Boolean,
     // required: [true, "顯示方式必填"],
   },
-  img: String,
+  image: {
+    type: String,
+    // required: [true, "書封必填"],
+  },
   voteTime: {
     type: Date,
     // required: [true, "投票時間必填"],
   },
   views: {
     type: Number,
+    default: 0,
     // required: [true, "瀏覽數必填"],
   },
   collectionNum: {
     type: Number,
+    default: 0,
     // required: [true, "收藏數必填"],
   },
   followNum: {
     type: Number,
+    default: 0,
     // required: [true, "關注數必填"],
   },
   totalVotes: {
     type: Number,
+    default: 0,
     // required: [true, "總投票數必填"],
   },
   latestContent: {
