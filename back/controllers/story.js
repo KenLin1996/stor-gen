@@ -4,10 +4,6 @@ import validator from "validator";
 
 export const create = async (req, res) => {
   try {
-    console.log("File info:", req.file); // 檢查 file 資訊
-    console.log("Body info:", req.body); // 檢查其他表單欄位
-
-    console.log(req.body.chapterLabels);
     req.body.image = req.file.path;
     const result = await Story.create({
       mainAuthor: req.user._id,
@@ -108,7 +104,9 @@ export const getAll = async (req, res) => {
 
     // 只查詢所需的字段
     const data = await Story.find({})
-      .select("title state show collectionNum followNum totalVotes image") // 只選取這些字段
+      .select(
+        "title state show collectionNum followNum totalVotes image author"
+      ) // 只選取這些字段
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)
       .limit(itemsPerPage);
@@ -180,7 +178,9 @@ export const get = async (req, res) => {
 
     // 只查詢所需的字段
     const data = await Story.find({ show: true })
-      .select("title state show collectionNum followNum totalVotes image") // 只選取這些字段
+      .select(
+        "title state show collectionNum followNum totalVotes image category author"
+      ) // 只選取這些字段
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)
       .limit(itemsPerPage);
