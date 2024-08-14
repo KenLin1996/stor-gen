@@ -368,7 +368,18 @@
   <v-dialog v-model="dialog.open" persistent width="500">
     <v-form @submit.prevent="submit" :disabled="isSubmitting">
       <v-card>
-        <v-card-title>編輯</v-card-title>
+        <div
+          class="d-flex align-center justify-space-between"
+          style="padding: 24px 24px 0px 24px"
+        >
+          <v-card-title class="px-0">編輯</v-card-title>
+          <v-btn
+            style="background-color: #f24e1e; color: white"
+            @click="deleteItem()"
+            >刪除故事</v-btn
+          >
+        </div>
+
         <v-card-text>
           <v-text-field
             label="書名"
@@ -561,18 +572,6 @@ const myStoryHeaders = [
 ];
 
 const myStoryItems = ref([]);
-// const myStoryItems = [
-//   {
-//     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzKYSIrA6-OO6TAY2mG-OT--cpO_HsVOGpbw&s",
-//     title:
-//       "想要讓人因此試著鍛煉成一個跟學生成員長很像的女生，結果我卻變成了她的僕人",
-//     state: "連載中(100%)",
-//     show: "公開",
-//     collectionNum: 1000,
-//     followNum: 1000,
-//     totalVotes: 2300203,
-//   },
-// ];
 
 const tableLoadMyStoryItems = async () => {
   try {
@@ -603,6 +602,28 @@ const tableLoadMyStoryItems = async () => {
   }
 };
 tableLoadMyStoryItems();
+
+const deleteItem = async () => {
+  try {
+    await apiAuth.delete(`/story/` + dialog.value.id);
+    createSnackbar({
+      text: "刪除成功",
+      snackbarProps: {
+        color: "green",
+      },
+    });
+    closeDialog();
+    tableLoadMyStoryItems(true); // 重新加載資料表
+  } catch (error) {
+    console.log(error);
+    createSnackbar({
+      text: error?.response?.data?.message || "發生錯誤",
+      snackbarProps: {
+        color: "red",
+      },
+    });
+  }
+};
 
 const continuationHeaders = [
   { title: "書名", align: "start", width: "130px", key: "title" },

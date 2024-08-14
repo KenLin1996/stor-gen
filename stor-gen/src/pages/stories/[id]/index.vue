@@ -47,7 +47,10 @@
       </v-row>
     </v-card>
     <div class="my-2">
-      <v-btn class="mr-4" style="background-color: #2883d3; color: white"
+      <v-btn
+        class="mr-4"
+        style="background-color: #2883d3; color: white"
+        :to="'/stories/' + story._id + '/articles/' + story.content[0]?._id"
         >開始閱讀</v-btn
       >
       <v-btn class="mr-4" style="background-color: #2883d3; color: white"
@@ -59,7 +62,7 @@
     <v-card class="pa-4" style="margin-top: 32px">
       <h3 class="">起始故事</h3>
       <v-divider class="my-2"></v-divider>
-      <p class="py-4">{{ story.content }}</p>
+      <p class="py-4">{{ story.content[0]?.content }}</p>
       <template v-for="chapterLabel in story.chapterLabels">
         <v-chip density="compact" color="primary" label="true" class="mr-2">
           {{ chapterLabel }}
@@ -155,12 +158,13 @@ const story = ref({
   totalWordCount: 0,
   collectionNum: 0,
   followNum: 0,
-  content: "",
+  content: [],
 });
 
 const load = async () => {
   try {
     const { data } = await api.get("/story/" + route.params.id);
+
     story.value._id = data.result._id;
     story.value.image = data.result.image;
     story.value.title = data.result.title;
@@ -172,14 +176,20 @@ const load = async () => {
     story.value.collectionNum = data.result.collectionNum;
     story.value.followNum = data.result.followNum;
 
+    // (story.value.content =
+    //   Array.isArray(data.result.content) && data.result.content.length > 0
+    //     ? data.result.content[0].content
+    //     : "內容不存在"),
     if (Array.isArray(data.result.content) && data.result.content.length > 0) {
-      story.value.content = data.result.content[0].content;
+      story.value.content = data.result.content;
     } else {
-      story.value.content = "內容不存在"; // 處理空數據的情況
+      story.value.content = "內容不存在"; // 處理空數據的情況ㄉ
     }
 
     document.title = "界筆 | " + story.value.title;
   } catch (error) {
+    console.log(data.result);
+
     console.log(error);
   }
 };
