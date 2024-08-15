@@ -179,7 +179,7 @@ export const get = async (req, res) => {
     // 只查詢所需的字段
     const data = await Story.find({ show: true })
       .select(
-        "title state show collectionNum followNum totalVotes image category author"
+        "title state show collectionNum followNum totalVotes image category mainAuthor latestContent chapterLabels totalWordCount content"
       ) // 只選取這些字段
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)
