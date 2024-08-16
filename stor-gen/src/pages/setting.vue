@@ -43,59 +43,164 @@
               <h3>帳號設定</h3>
             </div>
             <v-divider></v-divider>
-            <v-card flat>
-              <v-card-text>
-                <div id="profile" class="b-1 text-center mx-auto rounded-lg">
-                  <!-- <v-img :src="imageUrl" v-if="imageUrl"></v-img> -->
-                  <vue-file-agent
-                    class="mb-5 d-flex justify-center"
-                    accept="image/jpeg,image/png"
-                    deletable
-                    max-size="1MB"
-                    help-text="上傳大頭照"
-                    :error-text="{
-                      type: '檔案格式不支援',
-                      size: '檔案大小不能超過 1MB',
-                    }"
-                  ></vue-file-agent>
-                  <!-- <div>
-                    <input
-                      ref="fileInput"
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      @change="handleFileChange"
-                      style="display: none"
-                    />
-                    <button class="photoBtn" @click="triggerFileInput">
-                      更換照片
-                    </button>
-                    <p v-if="error">{{ error }}</p>
-                  </div> -->
 
-                  <v-row class="mb-5 text-center">
-                    <template v-for="(item, index) in members" :key="index">
-                      <v-col cols="4" class="my-auto">
-                        <label class="form-label" style="font-size: 18px">{{
-                          item.name
-                        }}</label>
+            <v-card flat>
+              <v-form @submit.prevent="submit" :disabled="isSubmitting">
+                <v-card-text>
+                  <div
+                    id="profile"
+                    class="b-1 w-50 text-center mx-auto rounded-lg"
+                  >
+                    <vue-file-agent
+                      class="d-flex justify-center mb-5"
+                      accept="image/jpeg,image/png"
+                      deletable
+                      max-size="1MB"
+                      help-text="上傳大頭照"
+                      :error-text="{
+                        type: '檔案格式不支援',
+                        size: '檔案大小不能超過 1MB',
+                      }"
+                    ></vue-file-agent>
+
+                    <v-row class="text-center" style="padding: 8px">
+                      <v-col cols="2" class="my-auto pa-0">
+                        <label class="form-label" style="font-size: 18px">
+                          暱稱
+                        </label>
                       </v-col>
-                      <v-col cols="4" class="my-auto">
-                        <p style="font-size: 18px">{{ item.member }}</p>
+                      <template v-for="item in users" :key="item.id">
+                        <v-col cols="8" class="my-auto">
+                          <p v-if="!item.isEditing" style="font-size: 18px">
+                            {{ item.username }}
+                          </p>
+                          <v-text-field
+                            v-else
+                            class="form-label"
+                            style="font-size: 18px"
+                            variant="outlined"
+                            hide-details
+                            single-line
+                            density="comfortable"
+                            clearable
+                            dense
+                            v-model="item.newUsername"
+                            :error-messages="usernameError"
+                            @keydown.enter="saveChanges(item)"
+                          ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="2" class="my-auto pa-0">
+                          <v-btn
+                            @click="toggleEdit(item)"
+                            label="編輯"
+                            variant="flat"
+                            color="#4E9194"
+                            class="pa-0"
+                            >編輯</v-btn
+                          >
+                        </v-col>
+                      </template>
+                    </v-row>
+
+                    <v-divider class="text-center my-3"></v-divider>
+
+                    <v-row class="text-center" style="padding: 8px">
+                      <v-col cols="2" class="my-auto pa-0">
+                        <label class="form-label" style="font-size: 18px">
+                          電子信箱
+                        </label>
                       </v-col>
-                      <v-col cols="4" class="ps-10">
-                        <v-btn label="編輯" variant="flat" color="#4E9194"
-                          >編輯</v-btn
-                        >
-                      </v-col>
-                      <v-divider class="text-center"></v-divider>
-                    </template>
-                  </v-row>
-                </div>
-              </v-card-text>
+                      <template v-for="item in users" :key="item.id">
+                        <v-col cols="8" class="my-auto">
+                          <p
+                            v-if="!item.isEmailToggleEditing"
+                            style="font-size: 18px"
+                          >
+                            {{ item.email }}
+                          </p>
+
+                          <v-text-field
+                            v-else
+                            class="form-label"
+                            style="font-size: 18px"
+                            variant="outlined"
+                            hide-details
+                            single-line
+                            density="comfortable"
+                            clearable
+                            dense
+                            v-model="item.newEmail"
+                            :error-messages="newEmailError"
+                            @keydown.enter="saveChanges(item)"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="2" class="my-auto pa-0">
+                          <v-btn
+                            label="編輯"
+                            variant="flat"
+                            color="#4E9194"
+                            @click="emailToggleEdit(item)"
+                            >編輯</v-btn
+                          >
+                        </v-col>
+                      </template>
+                    </v-row>
+                    <v-divider class="text-center my-3"></v-divider
+                    ><v-row class="text-center" style="padding: 8px">
+                      <template v-for="item in users" :key="item.id">
+                        <template v-if="!item.passwordisEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              密碼
+                            </label>
+                          </v-col>
+                          <v-col cols="8" class="my-auto">
+                            <p style="font-size: 18px">
+                              {{ item.password }}
+                            </p>
+                          </v-col>
+                        </template>
+                        <template v-else>
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              新密碼
+                            </label>
+                          </v-col>
+                          <v-col cols="8" class="my-auto">
+                            <v-text-field
+                              class="form-label"
+                              style="font-size: 18px"
+                              variant="outlined"
+                              hide-details
+                              single-line
+                              density="comfortable"
+                              clearable
+                              dense
+                              v-model="item.newPassword"
+                              :error-messages="passwordError"
+                              @keydown.enter="saveChanges(item)"
+                            ></v-text-field>
+                          </v-col>
+                        </template>
+                        <v-col cols="2" class="my-auto pa-0">
+                          <v-btn
+                            label="編輯"
+                            variant="flat"
+                            color="#4E9194"
+                            @click="passwordToggleEdit(item)"
+                            >編輯</v-btn
+                          >
+                        </v-col>
+                      </template>
+                    </v-row>
+                    <v-divider class="text-center my-3"></v-divider>
+                  </div>
+                </v-card-text>
+              </v-form>
             </v-card>
           </v-tabs-window-item>
 
-          <!-- 通知設定 -->
           <v-tabs-window-item value="option-2" style="height: 450px">
             <div class="d-flex align-center justify-space-between mb-4">
               <h3>通知設定</h3>
@@ -125,7 +230,6 @@
             </div>
           </v-tabs-window-item>
 
-          <!-- 閱讀模式 -->
           <v-tabs-window-item value="option-3" style="height: 450px">
             <div class="d-flex align-center justify-space-between mb-4">
               <h3>閱讀模式</h3>
@@ -159,8 +263,13 @@
 </template>
 
 <script setup>
-import { definePage } from "vue-router/auto";
 import { ref } from "vue";
+import { definePage } from "vue-router/auto";
+import { useSnackbar } from "vuetify-use-dialog";
+import * as yup from "yup";
+import { useForm } from "vee-validate";
+import { useApi } from "@/composables/axios";
+import { useRouter } from "vue-router";
 
 definePage({
   meta: {
@@ -170,48 +279,80 @@ definePage({
   },
 });
 
-const items = ref([
-  { title: "首頁", disabled: false, href: "/" },
-  { title: "設定", disabled: true, href: "/setting" },
-]);
+const router = useRouter();
+const { apiAuth } = useApi();
+const createSnackbar = useSnackbar();
+
+// 後端傳來的基本資料
+const users = ref([]);
+const loadUser = async () => {
+  try {
+    const { data } = await apiAuth.get("/user/profile");
+    users.value = [data.result]; // 將獲取的資料賦值給 users
+    users.value[0].password = "********";
+    users.value[0].newUsername = users.value[0].username; // 設置新用戶名為現有用戶名
+    users.value[0].newEmail = users.value[0].email;
+    users.value[0].newPassword = ""; // 用於存儲新密碼
+    console.log(users.value);
+    console.log(data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+loadUser();
+
+const toggleEdit = (item) => {
+  item.isEditing = !item.isEditing;
+};
+const emailToggleEdit = (item) => {
+  item.isEmailToggleEditing = !item.isEmailToggleEditing;
+};
+
+const passwordToggleEdit = (item) => {
+  item.passwordisEditing = !item.passwordisEditing;
+};
 
 const tab = ref("option-1");
 
-const members = ref([
-  { name: "姓名", member: "泥好泥" },
-  { name: "暱稱", member: "泥泥泥" },
-  { name: "電子信箱", member: "ninini@gmail.com" },
-  { name: "密碼", member: "ninininiii" },
-]);
+// 編輯表單
+const schema = yup.object({
+  username: yup.string().required("請輸入暱稱"),
+});
+const {
+  handleSubmit,
+  errors,
+  resetForm,
+  setFieldValue,
+  setFieldError,
+  setErrors,
+} = useForm({
+  validationSchema: schema,
+});
 
-// const fileInput = ref(null);
-// const error = ref("");
-// const imageUrl = ref("");
-
-// const triggerFileInput = () => {
-//   fileInput.value.click();
-// };
-
-// const handleFileChange = (event) => {
-//   const file = event.target.files[0];
-//   if (file) {
-//     if (!["image/jpeg", "image/png"].includes(file.type)) {
-//       error.value = "檔案格式不支援";
-//       return;
-//     }
-//     if (file.size > 1048576) {
-//       // 1MB in bytes
-//       error.value = "檔案大小不能超過 1MB";
-//       return;
-//     }
-//     error.value = "";
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//       imageUrl.value = reader.result;
-//     };
-//     reader.readAsDataURL(file);
-//   }
-// };
+const submit = handleSubmit(async (values) => {
+  const user = users.value[0];
+  try {
+    await apiAuth.put(`/user/profile/${user.id}`, values);
+    createSnackbar({
+      text: "修改成功",
+      color: "success",
+    });
+  } catch (err) {
+    if (err.response?.data?.errors) {
+      const errors = err.response.data.errors.reduce(
+        (acc, err) => ({ ...acc, [err.field]: err.message }),
+        {}
+      );
+      setErrors(errors);
+    } else {
+      createSnackbar({
+        text: "修改失敗",
+        color: "error",
+      });
+    }
+  }
+});
 </script>
 
 <style scoped>

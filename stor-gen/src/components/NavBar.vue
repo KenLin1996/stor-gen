@@ -47,7 +47,7 @@
       <v-spacer></v-spacer>
 
       <!-- 搜尋匡 -->
-      <v-responsive max-width="300">
+      <!-- <v-responsive max-width="300">
         <v-text-field
           label="搜尋"
           prepend-inner-icon="mdi-magnify"
@@ -58,7 +58,7 @@
           clearable
           color="black"
         ></v-text-field>
-      </v-responsive>
+      </v-responsive> -->
 
       <!-- 註冊/登入按鈕 -->
       <template v-if="!user.isLogin">
@@ -80,7 +80,7 @@
       <template v-else>
         <v-menu open-on-hover transition="slide-y-transition">
           <template v-slot:activator="{ props }">
-            <v-btn icon="mdi-bell" v-bind="props"></v-btn>
+            <v-btn icon="mdi-bell" v-bind="props" class="mr-2"></v-btn>
           </template>
           <v-list>
             <v-list-item

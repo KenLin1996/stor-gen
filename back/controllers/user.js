@@ -110,6 +110,8 @@ export const profile = (req, res) => {
   }
 };
 
+export const editProfile = async () => {};
+
 export const logout = async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter((token) => token != req.token);
