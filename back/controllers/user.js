@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 // 處理用戶請求
 export const create = async (req, res) => {
@@ -91,6 +92,7 @@ export const profile = (req, res) => {
       success: true,
       message: "",
       result: {
+        avatar: req.user.avatar,
         email: req.user.email,
         username: req.user.username,
         theme: req.user.theme,
@@ -110,7 +112,65 @@ export const profile = (req, res) => {
   }
 };
 
-export const editProfile = async () => {};
+export const editProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const updatedData = {};
+    // console.log(userId);
+    // console.log(req.body)
+    // 根據前端傳過來的值進行更新
+    if (req.body.username) {
+      updatedData.username = req.body.username;
+    }
+
+    if (req.body.password) {
+      updatedData.password = await bcrypt.hash(req.body.password, 10);
+    }
+
+    if (req.body.email) {
+      updatedData.email = req.body.email;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      throw new Error("NOT FOUND");
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "資料更新成功",
+    });
+  } catch (error) {
+    // 錯誤處理邏輯
+    if (error.name === "CastError" || error.message === "ID") {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "使用者 ID 格式錯誤",
+      });
+    } else if (error.message === "NOT FOUND") {
+      res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "找不到該使用者",
+      });
+    } else if (error.name === "ValidationError") {
+      const key = Object.keys(error.errors)[0];
+      const message = error.errors[key].message;
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message,
+      });
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "更新使用者資料失敗",
+      });
+    }
+  }
+};
 
 export const logout = async (req, res) => {
   try {

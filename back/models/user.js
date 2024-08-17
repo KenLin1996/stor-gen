@@ -4,6 +4,12 @@ import bcrypt from "bcrypt";
 import UserNotifySchema from "./userNotify.js";
 
 const UserSchema = new Schema({
+  avatar: {
+    type: String,
+    default() {
+      return;
+    },
+  },
   email: {
     type: String,
     required: [true, "使用者信箱必填"],

@@ -64,86 +64,138 @@
                     ></vue-file-agent>
 
                     <v-row class="text-center" style="padding: 8px">
-                      <v-col cols="2" class="my-auto pa-0">
-                        <label class="form-label" style="font-size: 18px">
-                          暱稱
-                        </label>
-                      </v-col>
                       <template v-for="item in users" :key="item.id">
-                        <v-col cols="8" class="my-auto">
-                          <p v-if="!item.isEditing" style="font-size: 18px">
-                            {{ item.username }}
-                          </p>
-                          <v-text-field
-                            v-else
-                            class="form-label"
-                            style="font-size: 18px"
-                            variant="outlined"
-                            hide-details
-                            single-line
-                            density="comfortable"
-                            clearable
-                            dense
-                            v-model="item.newUsername"
-                            :error-messages="usernameError"
-                            @keydown.enter="saveChanges(item)"
-                          ></v-text-field>
-                        </v-col>
+                        <template v-if="!item.isEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              暱稱
+                            </label>
+                          </v-col>
+                          <v-col cols="8" class="my-auto">
+                            <p style="font-size: 18px">
+                              {{ item.username }}
+                            </p>
+                          </v-col>
+                        </template>
 
-                        <v-col cols="2" class="my-auto pa-0">
-                          <v-btn
-                            @click="toggleEdit(item)"
-                            label="編輯"
-                            variant="flat"
-                            color="#4E9194"
-                            class="pa-0"
-                            >編輯</v-btn
-                          >
-                        </v-col>
+                        <template v-else>
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              暱稱
+                            </label>
+                          </v-col>
+                          <v-col cols="10" class="my-auto">
+                            <v-text-field
+                              class="form-label"
+                              style="font-size: 18px"
+                              minlength="3"
+                              maxlength="20"
+                              variant="outlined"
+                              single-line
+                              density="comfortable"
+                              clearable
+                              dense
+                              v-model="newUsername"
+                              :error-messages="newUsernameError"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" class="my-auto">
+                            <v-btn
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              @click="cancelEdit(item, 'username')"
+                              >取消</v-btn
+                            >
+                            <v-btn
+                              type="submit"
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              :loading="isSubmitting"
+                              >保存</v-btn
+                            >
+                          </v-col>
+                        </template>
+                        <template v-if="!item.isEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <v-btn
+                              @click="toggleEdit(item)"
+                              variant="flat"
+                              color="#4E9194"
+                              class="pa-0"
+                              >編輯</v-btn
+                            >
+                          </v-col>
+                        </template>
                       </template>
                     </v-row>
 
                     <v-divider class="text-center my-3"></v-divider>
 
                     <v-row class="text-center" style="padding: 8px">
-                      <v-col cols="2" class="my-auto pa-0">
-                        <label class="form-label" style="font-size: 18px">
-                          電子信箱
-                        </label>
-                      </v-col>
                       <template v-for="item in users" :key="item.id">
-                        <v-col cols="8" class="my-auto">
-                          <p
-                            v-if="!item.isEmailToggleEditing"
-                            style="font-size: 18px"
-                          >
-                            {{ item.email }}
-                          </p>
+                        <template v-if="!item.isEmailToggleEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              電子信箱
+                            </label>
+                          </v-col>
+                          <v-col cols="8" class="my-auto">
+                            <p style="font-size: 18px">
+                              {{ item.email }}
+                            </p>
+                          </v-col>
+                        </template>
+                        <template v-else>
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              電子信箱
+                            </label>
+                          </v-col>
+                          <v-col cols="10" class="my-auto">
+                            <v-text-field
+                              class="form-label"
+                              style="font-size: 18px"
+                              variant="outlined"
+                              single-line
+                              density="comfortable"
+                              clearable
+                              dense
+                              v-model="newEmail"
+                              :error-messages="newEmailError"
+                            ></v-text-field>
+                          </v-col>
 
-                          <v-text-field
-                            v-else
-                            class="form-label"
-                            style="font-size: 18px"
-                            variant="outlined"
-                            hide-details
-                            single-line
-                            density="comfortable"
-                            clearable
-                            dense
-                            v-model="item.newEmail"
-                            :error-messages="newEmailError"
-                            @keydown.enter="saveChanges(item)"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="2" class="my-auto pa-0">
-                          <v-btn
-                            label="編輯"
-                            variant="flat"
-                            color="#4E9194"
-                            @click="emailToggleEdit(item)"
-                            >編輯</v-btn
-                          >
-                        </v-col>
+                          <v-col cols="12" class="my-auto">
+                            <v-btn
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              @click="cancelEdit(item, 'email')"
+                              >取消</v-btn
+                            >
+                            <v-btn
+                              type="submit"
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              :loading="isSubmitting"
+                              >保存</v-btn
+                            >
+                          </v-col>
+                        </template>
+                        <template v-if="!item.isEmailToggleEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <v-btn
+                              @click="emailToggleEdit(item)"
+                              variant="flat"
+                              color="#4E9194"
+                              class="pa-0"
+                              >編輯</v-btn
+                            >
+                          </v-col>
+                        </template>
                       </template>
                     </v-row>
                     <v-divider class="text-center my-3"></v-divider
@@ -167,31 +219,82 @@
                               新密碼
                             </label>
                           </v-col>
-                          <v-col cols="8" class="my-auto">
+                          <v-col cols="10" class="my-auto">
                             <v-text-field
                               class="form-label"
                               style="font-size: 18px"
                               variant="outlined"
-                              hide-details
                               single-line
                               density="comfortable"
                               clearable
                               dense
-                              v-model="item.newPassword"
-                              :error-messages="passwordError"
-                              @keydown.enter="saveChanges(item)"
+                              :type="showPassword ? 'text' : 'password'"
+                              minlength="4"
+                              maxlength="20"
+                              v-model="newPassword"
+                              :error-messages="newPasswordError"
+                              :append-inner-icon="
+                                showPassword ? 'mdi-eye' : 'mdi-eye-off'
+                              "
+                              @click:append-inner="togglePasswordVisibility"
                             ></v-text-field>
                           </v-col>
+
+                          <v-col cols="2" class="my-auto pa-0">
+                            <label class="form-label" style="font-size: 18px">
+                              確認密碼
+                            </label>
+                          </v-col>
+                          <v-col cols="10" class="my-auto">
+                            <v-text-field
+                              class="form-label"
+                              style="font-size: 18px"
+                              variant="outlined"
+                              single-line
+                              density="comfortable"
+                              clearable
+                              dense
+                              :type="showPasswordConfirm ? 'text' : 'password'"
+                              minlength="4"
+                              maxlength="20"
+                              v-model="passwordConfirm"
+                              :error-messages="passwordConfirmError"
+                              :append-inner-icon="
+                                showPasswordConfirm ? 'mdi-eye' : 'mdi-eye-off'
+                              "
+                              @click:append-inner="
+                                togglePasswordConfirmVisibility
+                              "
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" class="my-auto">
+                            <v-btn
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              @click="cancelEdit(item, 'password')"
+                              >取消</v-btn
+                            >
+                            <v-btn
+                              type="submit"
+                              variant="flat"
+                              color="#4E9194"
+                              class="mx-1"
+                              :loading="isSubmitting"
+                              >保存</v-btn
+                            >
+                          </v-col>
                         </template>
-                        <v-col cols="2" class="my-auto pa-0">
-                          <v-btn
-                            label="編輯"
-                            variant="flat"
-                            color="#4E9194"
-                            @click="passwordToggleEdit(item)"
-                            >編輯</v-btn
-                          >
-                        </v-col>
+                        <template v-if="!item.passwordisEditing">
+                          <v-col cols="2" class="my-auto pa-0">
+                            <v-btn
+                              variant="flat"
+                              color="#4E9194"
+                              @click="passwordToggleEdit(item)"
+                              >編輯</v-btn
+                            >
+                          </v-col>
+                        </template>
                       </template>
                     </v-row>
                     <v-divider class="text-center my-3"></v-divider>
@@ -263,13 +366,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useForm, useField } from "vee-validate";
+import * as yup from "yup";
+import validator from "validator";
+import { useApi } from "../composables/axios.js";
 import { definePage } from "vue-router/auto";
 import { useSnackbar } from "vuetify-use-dialog";
-import * as yup from "yup";
-import { useForm } from "vee-validate";
-import { useApi } from "@/composables/axios";
-import { useRouter } from "vue-router";
 
 definePage({
   meta: {
@@ -279,80 +382,249 @@ definePage({
   },
 });
 
-const router = useRouter();
 const { apiAuth } = useApi();
 const createSnackbar = useSnackbar();
+
+const tab = ref("option-1");
+
+// const schema = yup.object({
+//   newEmail: yup
+//     .string()
+//     .required("使用者信箱必填")
+//     .test("isEmail", "使用者信箱格式錯誤", (value) => {
+//       return validator.isEmail(value);
+//     }),
+//   newUsername: yup
+//     .string()
+//     .required("使用者暱稱必填")
+//     .min(1, "使用者暱稱長度不符")
+//     .max(20, "使用者暱稱長度不符")
+//     .test(
+//       // .test(自訂驗證名稱, 錯誤訊息, 驗證 function)
+//       "isAlphanumeric",
+//       "使用者帳號格式錯誤",
+//       (value) => {
+//         return validator.isAlphanumeric(value);
+//       }
+//     ),
+//   newPassword: yup
+//     .string()
+//     .required("使用者密碼必填")
+//     .min(4, "使用者密碼長度不符")
+//     .max(20, "使用者密碼長度不符"),
+//   passwordConfirm: yup.string().oneOf([yup.ref("newPassword")], "密碼不一致"),
+// });
+
+const schema = yup.object({
+  newEmail: yup.string().test("isEmail", "使用者信箱格式錯誤", (value) => {
+    return value ? validator.isEmail(value) : true;
+  }),
+  newUsername: yup
+    .string()
+    .min(1, "使用者暱稱長度不符")
+    .max(20, "使用者暱稱長度不符")
+    .test("isAlphanumeric", "使用者帳號格式錯誤", (value) => {
+      return value ? validator.isAlphanumeric(value) : true;
+    }),
+  newPassword: yup
+    .string()
+    .min(4, "使用者密碼長度不符")
+    .max(20, "使用者密碼長度不符"),
+  passwordConfirm: yup.string().oneOf([yup.ref("newPassword")], "密碼不一致"),
+});
+
+const { handleSubmit, isSubmitting } = useForm({
+  validationSchema: schema,
+});
+
+const { value: newUsername, errorMessage: newUsernameError } =
+  useField("newUsername");
+const { value: newEmail, errorMessage: newEmailError } = useField("newEmail");
+const { value: newPassword, errorMessage: newPasswordError } =
+  useField("newPassword");
+const { value: passwordConfirm, errorMessage: passwordConfirmError } =
+  useField("passwordConfirm");
+
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const togglePasswordConfirmVisibility = () => {
+  showPasswordConfirm.value = !showPasswordConfirm.value;
+};
 
 // 後端傳來的基本資料
 const users = ref([]);
 const loadUser = async () => {
   try {
     const { data } = await apiAuth.get("/user/profile");
-    users.value = [data.result]; // 將獲取的資料賦值給 users
+    users.value = [data.result];
     users.value[0].password = "********";
     users.value[0].newUsername = users.value[0].username; // 設置新用戶名為現有用戶名
     users.value[0].newEmail = users.value[0].email;
     users.value[0].newPassword = ""; // 用於存儲新密碼
+    users.value[0].passwordConfirm = "";
     console.log(users.value);
     console.log(data);
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.log(error);
   }
 };
 
 loadUser();
 
+const user = computed(() => users.value[0] || {});
+
 const toggleEdit = (item) => {
+  users.value.forEach((user) => {
+    user.isEditing = false;
+    user.isEmailToggleEditing = false;
+    user.passwordisEditing = false;
+  });
   item.isEditing = !item.isEditing;
 };
+
 const emailToggleEdit = (item) => {
+  users.value.forEach((user) => {
+    user.isEditing = false;
+    user.isEmailToggleEditing = false;
+    user.passwordisEditing = false;
+  });
   item.isEmailToggleEditing = !item.isEmailToggleEditing;
 };
 
 const passwordToggleEdit = (item) => {
+  users.value.forEach((user) => {
+    user.isEditing = false;
+    user.isEmailToggleEditing = false;
+    user.passwordisEditing = false;
+  });
   item.passwordisEditing = !item.passwordisEditing;
 };
 
-const tab = ref("option-1");
+const cancelEdit = (item, type) => {
+  switch (type) {
+    case "username":
+      newUsername.value = "";
+      item.isEditing = false;
+      break;
+    case "email":
+      newEmail.value = "";
+      item.isEmailToggleEditing = false;
+      break;
+    case "password":
+      newPassword.value = "";
+      passwordConfirm.value = "";
+      item.passwordisEditing = false;
+      break;
+    default:
+  }
+};
 
-// 編輯表單
-const schema = yup.object({
-  username: yup.string().required("請輸入暱稱"),
-});
-const {
-  handleSubmit,
-  errors,
-  resetForm,
-  setFieldValue,
-  setFieldError,
-  setErrors,
-} = useForm({
-  validationSchema: schema,
-});
-
-const submit = handleSubmit(async (values) => {
-  const user = users.value[0];
+const submit = handleSubmit(async () => {
   try {
-    await apiAuth.put(`/user/profile/${user.id}`, values);
-    createSnackbar({
-      text: "修改成功",
-      color: "success",
-    });
-  } catch (err) {
-    if (err.response?.data?.errors) {
-      const errors = err.response.data.errors.reduce(
-        (acc, err) => ({ ...acc, [err.field]: err.message }),
-        {}
-      );
-      setErrors(errors);
+    const updatedData = {}; // 用來存儲需要更新的資料
+
+    if (newUsername.value && newUsername.value !== user.value.username) {
+      updatedData.username = newUsername.value;
+    }
+    if (newEmail.value && newEmail.value !== user.value.email) {
+      updatedData.email = newEmail.value;
+    }
+    if (newPassword.value) {
+      updatedData.password = newPassword.value;
+    }
+
+    if (Object.keys(updatedData).length === 0) {
+      createSnackbar({
+        text: "沒有任何變更",
+        snackbarProps: {
+          color: "accent",
+        },
+      });
+      return;
+    }
+
+    const response = await apiAuth.patch("/user/profile", updatedData);
+    if (response.data.success) {
+      createSnackbar({
+        text: "資料修改成功",
+        snackbarProps: {
+          color: "green",
+        },
+      });
+      loadUser(); // 重新加載用戶資料
     } else {
       createSnackbar({
-        text: "修改失敗",
-        color: "error",
+        text: response.data.message || "發生錯誤",
+        snackbarProps: {
+          color: "red",
+        },
       });
     }
+  } catch (error) {
+    createSnackbar({
+      text: error?.response?.data?.message || "發生錯誤",
+      snackbarProps: {
+        color: "red",
+      },
+    });
   }
 });
+
+// const submit = handleSubmit(async () => {
+//   try {
+//     const item = users.value[0]; // 用戶的資料
+//     const updatedData = {}; // 用來存儲需要更新的資料
+
+//     if (newUsername.value && newUsername.value !== item.username) {
+//       updatedData.username = newUsername.value;
+//     }
+//     if (newEmail.value && newEmail.value !== item.email) {
+//       updatedData.email = newEmail.value;
+//     }
+//     if (newPassword.value) {
+//       updatedData.password = newPassword.value;
+//     }
+
+//     if (Object.keys(updatedData).length === 0) {
+//       createSnackbar({
+//         text: "沒有任何變更",
+//         snackbarProps: {
+//           color: "accent",
+//         },
+//       });
+//       return;
+//     }
+
+//     const response = await apiAuth.patch("/user/profile", updatedData);
+//     if (response.data.success) {
+//       createSnackbar({
+//         text: "資料修改成功",
+//         snackbarProps: {
+//           color: "green",
+//         },
+//       });
+//     } else {
+//       createSnackbar({
+//         text: response.data.message || "發生錯誤",
+//         snackbarProps: {
+//           color: "red",
+//         },
+//       });
+//     }
+//   } catch (error) {
+//     createSnackbar({
+//       text: error?.response?.data?.message || "發生錯誤",
+//       snackbarProps: {
+//         color: "red",
+//       },
+//     });
+//   }
+// });
 </script>
 
 <style scoped>
