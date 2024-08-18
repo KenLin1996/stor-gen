@@ -55,46 +55,6 @@ export const create = async (req, res) => {
   }
 };
 
-// export const getAll = async (req, res) => {
-//   try {
-//     // const data = await Story;
-//     const sortBy = req.query.sortBy || "createdAt";
-//     const sortOrder = req.query.sortOrder || "desc";
-//     const itemsPerPage = req.query.itemsPerPage * 1 || 10;
-//     const page = req.query.page * 1 || 1;
-//     const regex = new RegExp(req.query.search || "", "i");
-//     const data = await Story.find({
-//       $or: [{ name: regex }, { description: regex }],
-//     })
-//       // const text = 'a'
-//       // const obj = { [text]: 1 }
-//       // obj.a --> 1
-//       .sort({ [sortBy]: sortOrder })
-//       // 如果一頁有 10 筆
-//       // 第一頁 = 1 ~ 10 = 跳過 0 筆 = (第 1 頁 - 1) * 10 = 0
-//       // 第二頁 = 11 ~ 20 = 跳過 10 筆 = (第 2 頁 - 1) * 10 = 10
-//       // 第三頁 = 21 ~ 30 = 跳過 20 筆 = (第 3 頁 - 1) * 10 = 20
-//       .skip((page - 1) * itemsPerPage)
-//       .limit(itemsPerPage);
-
-//     const total = await Story.estimatedDocumentCount();
-//     res.status(StatusCodes.OK).json({
-//       success: true,
-//       message: "",
-//       result: {
-//         data,
-//         total,
-//       },
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: "未知錯誤",
-//     });
-//   }
-// };
-
 export const getAll = async (req, res) => {
   try {
     const sortBy = req.query.sortBy || "createdAt";
@@ -179,7 +139,7 @@ export const get = async (req, res) => {
     // 只查詢所需的字段
     const data = await Story.find({ show: true })
       .select(
-        "title state show collectionNum followNum totalVotes image category mainAuthor latestContent chapterLabels totalWordCount content"
+        "title state show collectionNum followNum totalVotes image category mainAuthor latestContent chapterLabels totalWordCount content chapterName"
       ) // 只選取這些字段
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)

@@ -77,7 +77,7 @@
     </v-row>
   </v-container>
   <v-container style="padding: 32px">
-    <v-row class="justify-space-between">
+    <!-- <v-row class="justify-space-between">
       <v-col cols="12" class="pb-0">
         <h2>最新故事區</h2>
       </v-col>
@@ -88,8 +88,36 @@
         <BookCard />
         <BookCard />
       </v-col>
+    </v-row> -->
+
+    <v-row class="justify-space-between">
+      <v-col cols="12" class="pb-0">
+        <h2>最新故事</h2>
+      </v-col>
+      <v-divider class="mb-3"></v-divider>
+      <v-col cols="12" class="d-flex flex-column justify-space-between">
+        <template v-for="(story, index) in stories" :key="index">
+          <StoryItem v-bind="story" />
+        </template>
+        <!-- <VoteItem /> -->
+      </v-col>
     </v-row>
   </v-container>
+
+  <v-container style="padding: 32px">
+    <v-row class="justify-space-between">
+      <v-col cols="12" class="pb-0">
+        <h2>完結故事</h2>
+      </v-col>
+      <v-divider class="mb-3"></v-divider>
+      <v-col cols="12" class="d-flex flex-row justify-space-between">
+        <template v-for="story in stories" :key="story._id">
+          <BookCard v-bind="story" />
+        </template>
+      </v-col>
+    </v-row>
+  </v-container>
+
   <v-container style="padding: 32px">
     <v-row class="justify-space-between">
       <v-col cols="12" class="pb-0">
@@ -145,7 +173,7 @@ const stories = ref([]);
 const loadStories = async () => {
   try {
     const { data } = await api.get("/story");
-    // console.log(data.result.data);
+    console.log(data.result.data);
     stories.value.splice(0, stories.value.length, ...data.result.data);
   } catch (error) {
     console.log(error);
@@ -168,3 +196,4 @@ const resources = [
 ];
 loadStories();
 </script>
+<style scoped></style>

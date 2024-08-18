@@ -1,5 +1,5 @@
 <template>
-  <v-card class="w-100 px-6 py-2 rounded-lg">
+  <v-card class="w-100 px-6 py-2 rounded-lg" style="border: 1px solid #48a9a6">
     <v-card-title class="pa-0">
       <div class="title-row">
         <div class="title-text">
