@@ -98,6 +98,7 @@
       <v-col cols="12" class="d-flex flex-column justify-space-between">
         <template v-for="(story, index) in stories" :key="index">
           <StoryItem v-bind="story" />
+          <!-- <StoryItem v-bind="{ ...story, createdAt: story.createdAt }" /> -->
         </template>
         <!-- <VoteItem /> -->
       </v-col>
@@ -175,6 +176,7 @@ const loadStories = async () => {
     const { data } = await api.get("/story");
     console.log(data.result.data);
     stories.value.splice(0, stories.value.length, ...data.result.data);
+    console.log(stories.value);
   } catch (error) {
     console.log(error);
   }

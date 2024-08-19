@@ -55,6 +55,67 @@ export const create = async (req, res) => {
   }
 };
 
+// const mergeTopVotedContent = async (storyId) => {
+//   const story = await Story.findById(storyId).populate("content");
+//   if (story) {
+//     const topVotedContent = story.content.sort(
+//       (a, b) => b.voteCount - a.voteCount
+//     )[0];
+
+//     if (topVotedContent) {
+//       topVotedContent.main = true;
+//       await topVotedContent.save();
+//       story.latestContent = topVotedContent;
+//       await story.save();
+//       console.log(`Top voted content merged into the story: ${story.title}`);
+//     } else {
+//       console.log("No content found for voting.");
+//     }
+//   } else {
+//     console.log("Story not found.");
+//   }
+// };
+
+export const extendStory = async (req, res) => {
+  try {
+    const { storyId, chapterName, content } = req.body;
+    const story = await Story.findById(storyId).populate("content");
+    if (story) {
+      // 新增故事內容
+      const newContent = new StoryContent({
+        chapterName,
+        content,
+        parent: storyId,
+        // 設定初始投票數為 0
+        voteCount: 0,
+      });
+
+      await newContent.save();
+
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "",
+        result,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    if (error.name === "ValidationError") {
+      const key = Object.keys(error.errors)[0];
+      const message = error.errors[key].message;
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message,
+      });
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "未知錯誤",
+      });
+    }
+  }
+};
+
 export const getAll = async (req, res) => {
   try {
     const sortBy = req.query.sortBy || "createdAt";
@@ -138,9 +199,9 @@ export const get = async (req, res) => {
 
     // 只查詢所需的字段
     const data = await Story.find({ show: true })
-      .select(
-        "title state show collectionNum followNum totalVotes image category mainAuthor latestContent chapterLabels totalWordCount content chapterName"
-      ) // 只選取這些字段
+      // .select(
+      //   "title state show collectionNum followNum totalVotes image category mainAuthor latestContent chapterLabels totalWordCount content chapterName createdAt"
+      // )
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)
       .limit(itemsPerPage);

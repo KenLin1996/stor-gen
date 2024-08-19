@@ -1,7 +1,7 @@
 <template>
   <v-expansion-panels>
     <v-expansion-panel>
-      <v-expansion-panel-title v-slot="{ expanded }">
+      <v-expansion-panel-title>
         <v-row no-gutters>
           <v-col
             class="d-flex align-center justify-center text--secondary"
@@ -38,14 +38,26 @@
               >2天07時15分</span
             > -->
             <br />
-            <span style="color: black; margin-right: 10px">2024-07-15</span>
+            <span style="color: black; margin-right: 10px">
+              {{
+                new Date(createdAt).toLocaleString("zh-TW", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              }}
+            </span>
           </v-col>
         </v-row>
       </v-expansion-panel-title>
       <v-expansion-panel-text>
         <v-row style="padding: 12px">
           <v-col cols="12" class="mt-1 pa-0" style="font-size: 8px"
-            ><h1>開始故事</h1></v-col
+            ><h1>
+              {{ content[0].latestContent ? "最新內容" : "開始故事" }}
+            </h1></v-col
           >
           <v-col cols="12">
             <v-row>
@@ -63,7 +75,12 @@
               </v-col>
               <v-col cols="11" class="pl-0">
                 <p>
-                  {{ content[0].content }}
+                  <!-- {{ content[0].content }} -->
+                  {{
+                    content[0].latestContent
+                      ? content[0].latestContent
+                      : content[0].content
+                  }}
                 </p>
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -77,39 +94,43 @@
                   </v-btn>
                 </v-card-actions>
                 <v-dialog v-model="dialog" max-width="500">
-                  <v-card>
-                    <v-card-title
-                      class="text-center"
-                      style="background-color: #97d8c4"
-                      >延續故事</v-card-title
-                    >
-                    <v-card-text class="py-4 pb-0">
-                      <v-text-field
-                        class="mb-4"
-                        label="輸入章節名稱"
-                        hide-details
-                        :minlength="1"
-                        :maxlength="60"
-                      ></v-text-field>
-                      <v-textarea
-                        v-model="chapterContent"
-                        :label="`故事內容（字數：${minWords} - ${maxWords} 字`"
-                        rows="10"
-                        :minlength="`${minWords}`"
-                        :maxlength="`${maxWords}`"
-                        counter
-                        :rules="contentRules"
-                        style="margin-bottom: 8px"
-                      ></v-textarea>
-                    </v-card-text>
-                    <v-card-actions class="justify-center align-start py-0">
-                      <v-btn
-                        style="background-color: #4e9194; color: #000000"
-                        @click="publishStory"
-                        >發布</v-btn
+                  <v-form @submit.prevent="submit" :disabled="isSubmitting">
+                    <v-card>
+                      <v-card-title
+                        class="text-center"
+                        style="background-color: #97d8c4"
+                        >延續故事</v-card-title
                       >
-                    </v-card-actions>
-                  </v-card>
+                      <v-card-text class="py-4 pb-0">
+                        <v-text-field
+                          v-model="newchapterName.value.value"
+                          class="mb-4"
+                          label="輸入章節名稱"
+                          hide-details
+                          :minlength="1"
+                          :maxlength="60"
+                        ></v-text-field>
+                        <v-textarea
+                          v-model="newChapterContent.value.value"
+                          :label="`故事內容（字數：${minWords} - ${maxWords} 字`"
+                          rows="10"
+                          :minlength="`${minWords}`"
+                          :maxlength="`${maxWords}`"
+                          counter
+                          :rules="contentRules"
+                          style="margin-bottom: 8px"
+                        ></v-textarea>
+                      </v-card-text>
+                      <v-card-actions class="justify-center align-start py-0">
+                        <v-btn
+                          style="background-color: #4e9194; color: #000000"
+                          type="submit"
+                          :loading="isSubmitting"
+                          >發布</v-btn
+                        >
+                      </v-card-actions>
+                    </v-card>
+                  </v-form>
                 </v-dialog>
               </v-col>
             </v-row>
@@ -128,25 +149,54 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import * as yup from "yup";
+import { useForm, useField } from "vee-validate";
+import { useApi } from "../composables/axios.js";
+import { useSnackbar } from "vuetify-use-dialog";
 import VoteItem from "@/components/VoteItem.vue";
+
+const { api } = useApi();
+const createSnackbar = useSnackbar();
+
+// const newchapterName = ref("");
+// const newChapterContent = ref("");
+const minWords = ref(100);
+const maxWords = ref(500);
+
+const schema = yup.object({
+  newChapterContent: yup
+    .string()
+    .required("故事內容必填")
+    .min(minWords.value, `故事內容不能少於 ${minWords.value} 字`)
+    .max(maxWords.value, `故事內容不能超過 ${maxWords.value} 字`),
+});
+
+const { handleSubmit, isSubmitting } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    newChapterContent: "",
+  },
+});
+
+const newchapterName = useField("newchapterName");
+const newChapterContent = useField("newChapterContent");
 
 const isFilled = ref(false);
 const dialog = ref(false);
-// const chapterName = ref("");
-const chapterContent = ref("");
-const minWords = ref(100);
-const maxWords = ref(500);
-const { category, title, chapterName, mainAuthor, content } = defineProps([
-  "category",
-  "title",
-  "chapterName",
-  "mainAuthor",
-  "content",
-]);
+
+const { category, title, chapterName, mainAuthor, content, storyId } =
+  defineProps([
+    "category",
+    "title",
+    "chapterName",
+    "mainAuthor",
+    "content",
+    "createdAt",
+    "storyId",
+  ]);
 const toggleHeart = () => {
   isFilled.value = !isFilled.value;
 };
-
 const icon = computed(() =>
   isFilled.value ? "mdi-heart" : "mdi-heart-outline"
 );
@@ -161,19 +211,30 @@ const contentRules = computed(() => [
     `內容字數需在 ${minWords.value} 至 ${maxWords.value} 字之間`,
 ]);
 
-const publishStory = () => {
-  if (
-    chapterContent.value.length >= minWords.value &&
-    chapterContent.value.length <= maxWords.value
-  ) {
-    // 在這裡處理發布故事的邏輯
-    console.log("章節名稱:", chapterName.value);
-    console.log("內容:", chapterContent.value);
+const submit = handleSubmit(async (values) => {
+  try {
+    await api.post("/story/storyContent", {
+      chapterName: values.newchapterName,
+      content: values.newChapterContent,
+      parent: storyId,
+    });
+    createSnackbar({
+      text: "註冊成功",
+      snackbarProps: {
+        color: "green",
+      },
+    });
     dialog.value = false;
-  } else {
-    alert(`內容字數需在 ${minWords.value} 至 ${maxWords.value} 字之間`);
+  } catch (error) {
+    console.log(error);
+    createSnackbar({
+      text: error?.response?.data?.message || "發生錯誤",
+      snackbarProps: {
+        color: "red",
+      },
+    });
   }
-};
+});
 </script>
 
 <style scoped>

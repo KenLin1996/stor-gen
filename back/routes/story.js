@@ -4,16 +4,18 @@ import upload from "../middlewares/upload.js";
 // import admin from "../middlewares/admin.js";
 import {
   create,
+  extendStory,
   getAll,
   edit,
   get,
   getId,
   deleteId,
 } from "../controllers/story.js";
-// import { create, getAll, edit } from "../controllers/story.js";
+
 const router = Router();
 
 router.post("/", auth.jwt, upload, create);
+router.post("/storyContent", upload, extendStory);
 router.get("/", get);
 // router.get("/all", auth.jwt, admin, getAll);
 router.get("/all", auth.jwt, getAll);
