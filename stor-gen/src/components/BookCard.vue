@@ -14,7 +14,7 @@
         density="compact"
         color="primary"
         label="true"
-        style="font-size: 12px; padding: 2px 6px;"
+        style="font-size: 12px; padding: 2px 6px"
       >
         {{ category }}
       </v-chip>
@@ -27,8 +27,8 @@
       {{ author }}
     </v-card-text>
 
-    <v-card-text class="pa-0"
-      >I'm a thing. But, like most politicians, he promised more than
+    <v-card-text class="pa-0">
+      {{ content[0].content[0] }}
     </v-card-text>
   </v-card>
 </template>
@@ -39,12 +39,13 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const { _id, image, title, category, author } = defineProps([
+const { _id, image, title, category, author, content } = defineProps([
   "_id",
   "image",
   "title",
   "category",
   "author",
+  "content",
 ]);
 
 console.log(category);

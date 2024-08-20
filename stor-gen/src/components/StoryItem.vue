@@ -79,7 +79,7 @@
                   {{
                     content[0].latestContent
                       ? content[0].latestContent
-                      : content[0].content
+                      : content[0]?.content[0]
                   }}
                 </p>
                 <v-card-actions>
@@ -103,7 +103,7 @@
                       >
                       <v-card-text class="py-4 pb-0">
                         <v-text-field
-                          v-model="newchapterName.value.value"
+                          v-model="newChapterName.value.value"
                           class="mb-4"
                           label="輸入章節名稱"
                           hide-details
@@ -137,11 +137,17 @@
           </v-col>
         </v-row>
       </v-expansion-panel-text>
+
       <v-expansion-panel-text>
         <v-col cols="12" class="mt-1 mb-3 pa-0" style="font-size: 8px"
           ><h1>故事投票</h1></v-col
         >
-        <VoteItem />
+        <template
+          v-for="(extension, index) in extensions.slice(0, 5)"
+          :key="index"
+        >
+          <VoteItem :extension="extension" />
+        </template>
       </v-expansion-panel-text>
     </v-expansion-panel>
   </v-expansion-panels>
@@ -155,15 +161,15 @@ import { useApi } from "../composables/axios.js";
 import { useSnackbar } from "vuetify-use-dialog";
 import VoteItem from "@/components/VoteItem.vue";
 
-const { api } = useApi();
+const { api, apiAuth } = useApi();
+
 const createSnackbar = useSnackbar();
 
-// const newchapterName = ref("");
-// const newChapterContent = ref("");
 const minWords = ref(100);
 const maxWords = ref(500);
 
 const schema = yup.object({
+  newChapterName: yup.string().required("章節名稱必填").min(1).max(60),
   newChapterContent: yup
     .string()
     .required("故事內容必填")
@@ -178,22 +184,28 @@ const { handleSubmit, isSubmitting } = useForm({
   },
 });
 
-const newchapterName = useField("newchapterName");
+const newChapterName = useField("newChapterName");
 const newChapterContent = useField("newChapterContent");
 
 const isFilled = ref(false);
 const dialog = ref(false);
 
-const { category, title, chapterName, mainAuthor, content, storyId } =
-  defineProps([
-    "category",
-    "title",
-    "chapterName",
-    "mainAuthor",
-    "content",
-    "createdAt",
-    "storyId",
-  ]);
+const {
+  category,
+  title,
+  chapterName,
+  mainAuthor,
+  content,
+  _id: storyId,
+} = defineProps([
+  "category",
+  "title",
+  "chapterName",
+  "mainAuthor",
+  "content",
+  "createdAt",
+  "_id",
+]);
 const toggleHeart = () => {
   isFilled.value = !isFilled.value;
 };
@@ -211,15 +223,19 @@ const contentRules = computed(() => [
     `內容字數需在 ${minWords.value} 至 ${maxWords.value} 字之間`,
 ]);
 
+const newExtension = ref(null);
+
 const submit = handleSubmit(async (values) => {
+  console.log("Submitting with values:", values);
   try {
-    await api.post("/story/storyContent", {
-      chapterName: values.newchapterName,
+    const response = await apiAuth.post(`/story/${storyId}`, {
+      chapterName: values.newChapterName,
       content: values.newChapterContent,
-      parent: storyId,
     });
+    console.log("API Response:", response);
+    newExtension.value = response.data;
     createSnackbar({
-      text: "註冊成功",
+      text: "延伸內容提交成功",
       snackbarProps: {
         color: "green",
       },
@@ -235,6 +251,8 @@ const submit = handleSubmit(async (values) => {
     });
   }
 });
+// console.log(content[0].content);
+console.log("Story ID:", storyId);
 </script>
 
 <style scoped>

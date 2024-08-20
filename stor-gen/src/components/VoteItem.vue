@@ -3,7 +3,7 @@
     <v-card-title class="pa-0">
       <div class="title-row">
         <div class="title-text">
-          <h1 class="card-title my-1">臺北男工程師</h1>
+          <h1 class="card-title my-1">{{ extension.author }}</h1>
         </div>
         <div class="vote-section">
           <v-icon class="vote-icon" size="20">mdi-vote</v-icon>
@@ -51,6 +51,7 @@
 
 <script setup>
 import { ref } from "vue";
+import { defineProps } from "vue";
 
 const items = ref([{ title: "檢舉" }, { title: "刪除" }]);
 const voteCount = ref(0);
@@ -68,6 +69,13 @@ const cancel = () => {
   voteButtonDisabled.value = false;
   cancelButtonDisabled.value = true;
 };
+
+defineProps({
+  extension: {
+    type: Object,
+    required: true,
+  },
+});
 </script>
 
 <style scoped>

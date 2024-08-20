@@ -15,7 +15,7 @@ import {
 const router = Router();
 
 router.post("/", auth.jwt, upload, create);
-router.post("/storyContent", upload, extendStory);
+router.post("/:id", auth.jwt, extendStory);
 router.get("/", get);
 // router.get("/all", auth.jwt, admin, getAll);
 router.get("/all", auth.jwt, getAll);
