@@ -168,8 +168,14 @@ const StorySchema = new Schema(
       // required: [true, "書封必填"],
     },
     voteTime: {
-      type: Date,
+      type: Number,
       // required: [true, "投票時間必填"],
+    },
+    voteStart: {
+      type: Date,
+    },
+    voteEnd: {
+      type: Date,
     },
     views: {
       type: Number,

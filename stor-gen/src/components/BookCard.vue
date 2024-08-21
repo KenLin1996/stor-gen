@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-3" max-width="200">
+  <v-card class="pa-3 customMargin" max-width="200">
     <router-link :to="'/stories/' + _id">
       <v-img class="cursor-pointer" height="150px" :src="image" cover> </v-img>
     </router-link>
@@ -21,10 +21,10 @@
     </div>
     <v-card-text
       class="pa-0 cursor-pointer"
-      style="font-size: 12px"
+      style="font-size: 12px; color: #4e9194"
       @click="navigateTo('/1234')"
     >
-      {{ author }}
+      {{ mainAuthor?.username }}
     </v-card-text>
 
     <v-card-text class="pa-0">
@@ -39,12 +39,12 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const { _id, image, title, category, author, content } = defineProps([
+const { _id, image, title, category, mainAuthor, content } = defineProps([
   "_id",
   "image",
   "title",
   "category",
-  "author",
+  "mainAuthor",
   "content",
 ]);
 
@@ -54,3 +54,8 @@ const navigateTo = (path) => {
   router.push(path);
 };
 </script>
+<style scoped>
+.customMargin:not(:last-child) {
+  margin-right: 10px;
+}
+</style>

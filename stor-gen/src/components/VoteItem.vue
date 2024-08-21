@@ -1,9 +1,12 @@
 <template>
-  <v-card class="w-100 px-6 py-2 rounded-lg" style="border: 1px solid #48a9a6">
+  <v-card
+    class="w-100 px-6 py-2 rounded-lg"
+    style="border: 1px solid #48a9a6; margin: 16px 0px"
+  >
     <v-card-title class="pa-0">
       <div class="title-row">
         <div class="title-text">
-          <h1 class="card-title my-1">{{ extension.author }}</h1>
+          <h1 class="card-title my-1">{{ author?.username }}</h1>
         </div>
         <div class="vote-section">
           <v-icon class="vote-icon" size="20">mdi-vote</v-icon>
@@ -30,7 +33,7 @@
       </div>
     </v-card-title>
     <v-card-text class="pa-0 mx-7 py-1">
-      艾瑞克的日常工作包括解決這些魔獸引起的問題。有時，這些問題可能只是一個簡單的錯誤，如一個程式碼中的逻辑錯誤；有時，它們可能更為複雜，需要艾瑞克深入研究才能找到解決方案。無論何時，他都會全力以赴，因為他知道，如果不及時解決這些問題，魔獸就可能破壞整個數字世界，進而影響到現實世界。
+      {{ content?.[0].latestContent }}
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
       <v-btn
@@ -70,12 +73,11 @@ const cancel = () => {
   cancelButtonDisabled.value = true;
 };
 
-defineProps({
-  extension: {
-    type: Object,
-    required: true,
-  },
-});
+const { content, chapterName, author } = defineProps([
+  "content",
+  "chapterName",
+  "author",
+]);
 </script>
 
 <style scoped>

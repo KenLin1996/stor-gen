@@ -14,7 +14,7 @@
             <v-col cols="12">
               <p>
                 <strong>作者：</strong>
-                <span class="blue--text">{{ story.author }}</span>
+                <span class="blue--text">{{ story.mainAuthor?.username }}</span>
               </p>
             </v-col>
             <v-col cols="12">
@@ -62,7 +62,7 @@
     <v-card class="pa-4" style="margin-top: 32px">
       <h3 class="">起始故事</h3>
       <v-divider class="my-2"></v-divider>
-      <p class="py-4">{{ story.content[0]?.content }}</p>
+      <p class="py-4">{{ story.content[0]?.content?.[0] }}</p>
       <template v-for="chapterLabel in story.chapterLabels">
         <v-chip density="compact" color="primary" label="true" class="mr-2">
           {{ chapterLabel }}
@@ -151,7 +151,7 @@ const story = ref({
   _id: "",
   image: "",
   title: "",
-  author: "",
+  mainAuthor: "",
   category: "",
   chapterLabels: "",
   state: true,
@@ -168,14 +168,14 @@ const load = async () => {
     story.value._id = data.result._id;
     story.value.image = data.result.image;
     story.value.title = data.result.title;
-    story.value.author = data.result.author;
+    story.value.mainAuthor = data.result.mainAuthor;
     story.value.category = data.result.category;
     story.value.chapterLabels = data.result.chapterLabels;
     story.value.state = data.result.state;
     story.value.totalWordCount = data.result.totalWordCount;
     story.value.collectionNum = data.result.collectionNum;
     story.value.followNum = data.result.followNum;
-
+    console.log("mainAuthor 的值：", data.result.mainAuthor);
     // (story.value.content =
     //   Array.isArray(data.result.content) && data.result.content.length > 0
     //     ? data.result.content[0].content

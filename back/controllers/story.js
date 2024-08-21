@@ -250,7 +250,9 @@ export const get = async (req, res) => {
       // )
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * itemsPerPage)
-      .limit(itemsPerPage);
+      .limit(itemsPerPage)
+      .populate("extensions.author", "username")
+      .populate("mainAuthor", "username");
 
     const total = await Story.estimatedDocumentCount();
     res.status(StatusCodes.OK).json({
@@ -274,10 +276,9 @@ export const getId = async (req, res) => {
   try {
     if (!validator.isMongoId(req.params.id)) throw new Error("ID");
 
-    const result = await Story.findById(req.params.id).orFail(
-      new Error("NOT FOUND")
-    );
-
+    const result = await Story.findById(req.params.id)
+      .orFail(new Error("NOT FOUND"))
+      .populate("mainAuthor", "username");
     res.status(StatusCodes.OK).json({
       success: true,
       message: "",

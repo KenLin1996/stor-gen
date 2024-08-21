@@ -57,9 +57,6 @@
       <v-col cols="12" class="d-flex flex-row justify-space-between">
         <StoryItem />
       </v-col>
-      <v-col class="d-flex justify-center">
-        <VoteItem />
-      </v-col>
     </v-row>
   </v-container>
 
@@ -69,7 +66,8 @@
         <h2>熱門故事</h2>
       </v-col>
       <v-divider class="mb-3"></v-divider>
-      <v-col cols="12" class="d-flex flex-row justify-space-between">
+      <!-- <v-col cols="12" class="d-flex flex-row justify-space-between"> -->
+      <v-col cols="12" class="d-flex flex-row justify-start">
         <template v-for="story in stories" :key="story._id">
           <BookCard v-bind="story" />
         </template>
@@ -98,9 +96,7 @@
       <v-col cols="12" class="d-flex flex-column justify-space-between">
         <template v-for="(story, index) in stories" :key="index">
           <StoryItem v-bind="story" />
-          <!-- <StoryItem v-bind="{ ...story, createdAt: story.createdAt }" /> -->
         </template>
-        <!-- <VoteItem /> -->
       </v-col>
     </v-row>
   </v-container>

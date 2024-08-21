@@ -99,6 +99,23 @@
           <v-icon class="me-2" v-if="requiredFields.includes('category')"
             >mdi-asterisk</v-icon
           >
+          <v-label class="me-4 mb-0">投票時間</v-label>
+          <v-select
+            class="flex-grow-1"
+            hide-details
+            v-model="voteTime.value.value"
+            :error-messages="voteTime.errorMessage.value"
+            :items="voteTimeOptions"
+            required
+          ></v-select>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" class="d-flex align-center">
+          <v-icon class="me-2" v-if="requiredFields.includes('category')"
+            >mdi-asterisk</v-icon
+          >
           <v-label class="me-4 mb-0">作品分類</v-label>
           <v-select
             class="flex-grow-1"
@@ -144,7 +161,7 @@
             :error-messages="state.errorMessage.value"
           >
             <div class="d-flex align-center">
-              <v-radio label="完結" :value="true" class="me-4"></v-radio>
+              <!-- <v-radio label="完結" :value="true" class="me-4"></v-radio> -->
               <v-radio label="連載中" :value="false"></v-radio>
             </div>
           </v-radio-group>
@@ -265,9 +282,10 @@ const { handleSubmit, isSubmitting, resetForm } = useForm({
     title: "",
     chapterName: "",
     content: "",
+    voteTime: 0,
     category: "",
     chapterLabels: [],
-    state: true,
+    state: false,
     show: true,
   },
 });
@@ -276,6 +294,7 @@ const totalWordCount = useField("totalWordCount");
 const title = useField("title");
 const chapterName = useField("chapterName");
 const content = useField("content");
+const voteTime = useField("voteTime");
 const category = useField("category");
 const chapterLabels = useField("chapterLabels");
 const state = useField("state");
@@ -351,6 +370,19 @@ const labelOptions = ref([
   "恐怖",
 ]);
 
+const voteTimeOptions = ref([
+  { title: "5 分鐘", value: 1000 * 5 * 60 },
+  { title: "10 分鐘", value: 1000 * 10 * 60 },
+  { title: "30 分鐘", value: 1000 * 30 * 60 },
+  { title: "1 小時", value: 1000 * 60 * 60 },
+  { title: "2 小時", value: 1000 * 2 * 60 * 60 },
+  { title: "4 小時", value: 1000 * 4 * 60 * 60 },
+  { title: "8 小時", value: 1000 * 8 * 60 * 60 },
+  { title: "12 小時", value: 1000 * 12 * 60 * 60 },
+  { title: "24 小時", value: 1000 * 24 * 60 * 60 },
+  { title: "36 小時", value: 1000 * 36 * 60 * 60 },
+]);
+
 const clearForm = () => {
   resetForm();
   fileAgent.value.deleteFileRecord();
@@ -365,6 +397,8 @@ const submit = handleSubmit(async (values) => {
     fd.append("title", values.title);
     fd.append("chapterName", values.chapterName);
     fd.append("content", values.content);
+    // fd.append("voteTime", new Date().getTime() + values.voteTime);
+    fd.append("voteTime", values.voteTime);
     fd.append("category", values.category);
     for (const label of values.chapterLabels) {
       fd.append("chapterLabels", label);

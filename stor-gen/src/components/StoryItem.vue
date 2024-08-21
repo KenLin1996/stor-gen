@@ -1,5 +1,5 @@
 <template>
-  <v-expansion-panels>
+  <v-expansion-panels class="customMb">
     <v-expansion-panel>
       <v-expansion-panel-title>
         <v-row no-gutters>
@@ -17,26 +17,26 @@
               >{{ title }}</span
             >
             <br />
-            <!-- <span
-              v-if="expanded"
+            <span
+              v-if="extensions && extensions.length > 0"
               class="text--danger my-2 d-inline-block font-weight-black"
               style="font-size: 12px"
               >投票倒數計時：</span
-            > -->
+            >
             <br />
             <span>{{ chapterName }}</span>
           </v-col>
           <v-col cols="3" class="text-right" style="color: #4e9194">
             <span style="color: #4e9194; margin-right: 10px; font-size: 14px">
-              {{ mainAuthor }}
+              {{ mainAuthor?.username }}
             </span>
             <br />
-            <!-- <span
-              v-if="expanded"
+            <span
+              v-if="extensions && extensions.length > 0"
               class="my-2 d-inline-block"
               style="color: black; margin-right: 10px"
-              >2天07時15分</span
-            > -->
+              >{{ formattedVoteTime }}</span
+            >
             <br />
             <span style="color: black; margin-right: 10px">
               {{
@@ -44,8 +44,8 @@
                   year: "numeric",
                   month: "2-digit",
                   day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                  // hour: "2-digit",
+                  // minute: "2-digit",
                 })
               }}
             </span>
@@ -138,17 +138,19 @@
         </v-row>
       </v-expansion-panel-text>
 
-      <v-expansion-panel-text>
-        <v-col cols="12" class="mt-1 mb-3 pa-0" style="font-size: 8px"
-          ><h1>故事投票</h1></v-col
-        >
-        <template
-          v-for="(extension, index) in extensions.slice(0, 5)"
-          :key="index"
-        >
-          <VoteItem :extension="extension" />
-        </template>
-      </v-expansion-panel-text>
+      <template v-if="extensions && extensions.length > 0 && formattedVoteTime">
+        <v-expansion-panel-text>
+          <v-col cols="12" class="mt-1 mb-3 pa-0" style="font-size: 8px">
+            <h1>故事投票</h1>
+          </v-col>
+          <template
+            v-for="(extension, index) in extensions.slice(0, 5)"
+            :key="index"
+          >
+            <VoteItem v-bind="extension" />
+          </template>
+        </v-expansion-panel-text>
+      </template>
     </v-expansion-panel>
   </v-expansion-panels>
 </template>
@@ -160,10 +162,12 @@ import { useForm, useField } from "vee-validate";
 import { useApi } from "../composables/axios.js";
 import { useSnackbar } from "vuetify-use-dialog";
 import VoteItem from "@/components/VoteItem.vue";
+import { useRouter } from "vue-router";
 
 const { api, apiAuth } = useApi();
 
 const createSnackbar = useSnackbar();
+const router = useRouter();
 
 const minWords = ref(100);
 const maxWords = ref(500);
@@ -197,6 +201,8 @@ const {
   mainAuthor,
   content,
   _id: storyId,
+  extensions,
+  voteTime,
 } = defineProps([
   "category",
   "title",
@@ -204,7 +210,9 @@ const {
   "mainAuthor",
   "content",
   "createdAt",
+  "extensions",
   "_id",
+  "voteTime",
 ]);
 const toggleHeart = () => {
   isFilled.value = !isFilled.value;
@@ -222,6 +230,25 @@ const contentRules = computed(() => [
     (v.length >= minWords.value && v.length <= maxWords.value) ||
     `內容字數需在 ${minWords.value} 至 ${maxWords.value} 字之間`,
 ]);
+
+const formattedVoteTime = computed(() => {
+  if (!voteTime) return "";
+
+  const totalSeconds = Math.floor(voteTime / 1000);
+  const days = Math.floor(totalSeconds / (24 * 3600));
+  const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts = [];
+
+  if (days > 0) parts.push(`${days} 天`);
+  if (hours > 0) parts.push(`${hours} 小時`);
+  if (minutes > 0) parts.push(`${minutes} 分`);
+  if (seconds > 0) parts.push(`${seconds} 秒`);
+
+  return parts.join(" ");
+});
 
 const newExtension = ref(null);
 
@@ -241,6 +268,7 @@ const submit = handleSubmit(async (values) => {
       },
     });
     dialog.value = false;
+    router.push("/");
   } catch (error) {
     console.log(error);
     createSnackbar({
@@ -253,6 +281,7 @@ const submit = handleSubmit(async (values) => {
 });
 // console.log(content[0].content);
 console.log("Story ID:", storyId);
+console.log(voteTime);
 </script>
 
 <style scoped>
@@ -276,5 +305,9 @@ console.log("Story ID:", storyId);
 }
 .v-expansion-panel-title {
   border-bottom: 1px solid #e7e7e7;
+}
+
+.customMb:not(:last-child) {
+  margin-bottom: 12px;
 }
 </style>
