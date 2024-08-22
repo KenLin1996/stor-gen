@@ -34,7 +34,6 @@
 </template>
 
 <script setup>
-// import Category from "@/pages/category.vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -47,8 +46,6 @@ const { _id, image, title, category, mainAuthor, content } = defineProps([
   "mainAuthor",
   "content",
 ]);
-
-console.log(category);
 
 const navigateTo = (path) => {
   router.push(path);

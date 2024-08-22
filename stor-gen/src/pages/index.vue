@@ -75,19 +75,6 @@
     </v-row>
   </v-container>
   <v-container style="padding: 32px">
-    <!-- <v-row class="justify-space-between">
-      <v-col cols="12" class="pb-0">
-        <h2>最新故事區</h2>
-      </v-col>
-      <v-divider class="mb-3"></v-divider>
-      <v-col cols="12" class="d-flex flex-row justify-space-between">
-        <BookCard />
-        <BookCard />
-        <BookCard />
-        <BookCard />
-      </v-col>
-    </v-row> -->
-
     <v-row class="justify-space-between">
       <v-col cols="12" class="pb-0">
         <h2>最新故事</h2>
@@ -155,7 +142,6 @@ import { definePage } from "vue-router/auto";
 import { useApi } from "@/composables/axios";
 import BookCard from "../components/BookCard.vue";
 import StoryItem from "@/components/StoryItem.vue";
-import VoteItem from "@/components/VoteItem.vue";
 
 definePage({
   meta: {
@@ -170,9 +156,7 @@ const stories = ref([]);
 const loadStories = async () => {
   try {
     const { data } = await api.get("/story");
-    console.log(data.result.data);
     stories.value.splice(0, stories.value.length, ...data.result.data);
-    console.log(stories.value);
   } catch (error) {
     console.log(error);
   }
